@@ -5,10 +5,10 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 
 const jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
-const config = require('./config'); // get our config file
 const port = process.env.PORT || 8080; // used to create, sign, and verify tokens
 
 const User = require('./app/models/user'); // get our mongoose model
+const Product = require('./app/models/product');
 
 
 // Connection URL
@@ -61,6 +61,23 @@ app.get('/setup', function (req, res) {
     });
 });
 
+app.post('/product', (req, res) => {
+
+    let newProduct = new Product({
+        name: req.body.name,
+        title: req.body.title,
+        price: req.body.price
+    });
+
+    newProduct.save(err => {
+        if (err) res.send(err);
+        res.json(newProduct);
+    })
+
+});
+
+app.produc
+
 // API ROUTES -------------------
 
 // get an instance of the router for api routes
@@ -112,18 +129,18 @@ apiRoutes.post('/authenticate', function (req, res) {
 
 
 // route middleware to verify a token
-apiRoutes.use(function(req, res, next) {
+apiRoutes.use(function (req, res, next) {
 
     // check header or url parameters or post parameters for token
-    const token = req.body.token || req.query.token || req.headers['x-access-token'];
+    const token = req.body.token || req.query.token || req.headers['authorization'];
 
     // decode token
     if (token) {
 
         // verifies secret and checks exp
-        jwt.verify(token, app.get('superSecret'), function(err, decoded) {
+        jwt.verify(token, app.get('superSecret'), function (err, decoded) {
             if (err) {
-                return res.json({ success: false, message: 'Failed to authenticate token.' });
+                return res.json({success: false, message: 'Failed to authenticate token.'});
             } else {
                 // if everything is good, save to request for use in other routes
                 req.decoded = decoded;
